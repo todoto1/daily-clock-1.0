@@ -6,81 +6,50 @@
   <title>Time Widget</title>
   <style>
     :root{
-      /* ⬇️ 여기만 할 일 위젯의 실제 높이(px)로 바꾸면 전체 세로 길이가 정확히 같아집니다. */
-      --match-height: 260px; /* 예시값: DevTools로 할 일 위젯 .widget 높이 확인 후 입력 */
+      /* ⛔ 위젯 전체 높이 유지용. 이전에 쓰던 값 그대로! */
+      --match-height: 260px; /* 필요시 당신이 쓰던 값으로 유지 */
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; padding:20px; font-family:sans-serif; background:transparent;
+      display:flex; justify-content:center; align-items:center; min-height:100vh;
+    }
+    /* 바깥: 투명 배경 + 테두리/그림자 유지 */
+    .widget{
+      background:transparent; border-radius:32px; padding:0;
+      box-shadow:0 8px 32px rgba(0,0,0,.06);
+      width:100%; max-width:500px; border:1px solid rgba(0,0,0,.04);
+    }
+    /* 안쪽 카드: 흰 배경 */
+    .card{
+      background:#fff; border-radius:32px; padding:32px 28px;
+      width:100%; display:flex; flex-direction:column; height:var(--match-height);
+    }
+    .header{ text-align:center; margin-bottom:32px }
+    .title{ font-size:1.75rem; font-weight:700; color:#1a1a1a; margin-bottom:8px; letter-spacing:-.02em }
+    .date{ font-size:1rem; color:#999; font-weight:400 }
+
+    .clock-wrap{ flex:1; display:flex; align-items:center; justify-content:center; min-height:0 }
+    .clock{ position:relative; border-radius:50%; background:transparent; width:160px; height:160px }
+
+    /* 큰 숫자만 사용 */
+    .clock-number{
+      position:absolute; transform:translate(-50%,-50%); user-select:none; pointer-events:none;
+      color:#1a1a1a; font-weight:800; /* 더 두껍게 */
     }
 
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; padding: 20px;
-      font-family: sans-serif;
-      background: transparent;
-      display: flex; justify-content: center; align-items: center;
-      min-height: 100vh;
+    /* 중심점: 크게 */
+    .clock-center{
+      position:absolute; top:50%; left:50%;
+      background:#000cfe; border:4px solid #fff; border-radius:50%;
+      transform:translate(-50%,-50%); z-index:999; box-shadow:0 0 0 1px rgba(0,0,0,.1);
     }
 
-    /* 바깥: 배경 투명 + 테두리/그림자 유지(요청대로) */
-    .widget {
-      background: transparent;
-      border-radius: 32px;
-      padding: 0;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.06);
-      width: 100%; max-width: 500px;
-      border: 1px solid rgba(0,0,0,0.04);
-      /* 높이는 내부 .card가 맞춤 */
-    }
-
-    /* 안쪽 카드: 실제 흰 배경(다크모드에서도 또렷) */
-    .card {
-      background: #fff;
-      border-radius: 32px;
-      padding: 32px 28px;      /* 할 일 위젯과 동일 */
-      width: 100%;
-      display: flex; flex-direction: column;
-      /* ⬇️ 총 높이를 정확히 맞추기 위해 고정 */
-      height: var(--match-height);
-    }
-
-    .header { text-align: center; margin-bottom: 32px; } /* 동일 여백 */
-    .title  { font-size: 1.75rem; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; letter-spacing: -0.02em; }
-    .date   { font-size: 1rem; color: #999; font-weight: 400; }
-
-    .clock-wrap {
-      /* 남은 공간에 시계를 배치할 컨테이너 (높이 = match-height - (패딩+헤더) ) */
-      flex: 1;
-      display: flex; align-items: center; justify-content: center;
-      min-height: 0;
-    }
-
-    .clock {
-      position: relative;
-      border-radius: 50%;
-      background: transparent; /* 원판은 투명, 배경은 .card가 담당 */
-      width: 160px; height: 160px; /* 초기값(스크립트에서 자동으로 정확히 보정) */
-    }
-
-    .clock-number, .minor-number {
-      position: absolute; transform: translate(-50%, -50%);
-      user-select: none; pointer-events: none; color: #1a1a1a;
-    }
-    .clock-number { font-weight: 700; }
-    .minor-number { font-weight: 500; color: #333; }
-
-    .clock-center {
-      position: absolute; top: 50%; left: 50%;
-      background: #000cfe; border: 4px solid #fff;
-      border-radius: 50%; transform: translate(-50%, -50%);
-      z-index: 999; box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
-      width: 18px; height: 18px;
-    }
-
-    .hand {
-      position: absolute; top: 50%; left: 50%;
-      transform-origin: 50% 100%; border-radius: 999px; z-index: 10;
-    }
-    .hour-hand   { background: #1a1a1a; z-index: 12; }
-    .minute-hand { background: #1a1a1a; z-index: 13; } /* 분침 짧게 */
-    .second-hand { background: #000cfe; z-index: 11; }
+    /* 바늘 */
+    .hand{ position:absolute; top:50%; left:50%; transform-origin:50% 100%; border-radius:999px; z-index:10 }
+    .hour-hand{   background:#1a1a1a; z-index:12 } /* 블랙 */
+    .minute-hand{ background:#1a1a1a; z-index:13 } /* 블랙 */
+    .second-hand{ background:#000cfe; z-index:11 } /* 블루 */
   </style>
 </head>
 <body>
@@ -93,16 +62,18 @@
 
       <div class="clock-wrap" id="clockWrap">
         <div class="clock" id="clock">
+          <!-- 큰 숫자만 -->
           <div class="clock-number" id="num12">12</div>
           <div class="clock-number" id="num3">3</div>
           <div class="clock-number" id="num6">6</div>
           <div class="clock-number" id="num9">9</div>
 
+          <!-- 바늘 -->
           <div class="hand hour-hand"   id="hourHand"></div>
           <div class="hand minute-hand" id="minuteHand"></div>
           <div class="hand second-hand" id="secondHand"></div>
 
-          <div class="clock-center"></div>
+          <div class="clock-center" id="clockCenter"></div>
         </div>
       </div>
     </div>
@@ -110,100 +81,79 @@
 
   <script>
     // 날짜(한국)
-    function updateDate() {
-      const now = new Date();
-      const kr = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
-      todayDate.textContent = kr.toLocaleDateString('en-US', {
-        year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Seoul'
-      });
+    function updateDate(){
+      const now=new Date();
+      const kr=new Date(now.toLocaleString('en-US',{timeZone:'Asia/Seoul'}));
+      todayDate.textContent=kr.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric',timeZone:'Asia/Seoul'});
     }
 
     // 바늘 회전
-    const setHand = (el, deg) => el.style.transform = `translate(-50%, -100%) rotate(${deg}deg)`;
-    function updateClock() {
-      const now = new Date();
-      const kr = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
-      const h = kr.getHours() % 12, m = kr.getMinutes(), s = kr.getSeconds();
-      setHand(hourHand,   h * 30 + m * 0.5);
-      setHand(minuteHand, m * 6);
-      setHand(secondHand, s * 6);
+    const setHand=(el,deg)=>el.style.transform=`translate(-50%,-100%) rotate(${deg}deg)`;
+    function updateClock(){
+      const now=new Date();
+      const kr=new Date(now.toLocaleString('en-US',{timeZone:'Asia/Seoul'}));
+      const h=kr.getHours()%12, m=kr.getMinutes(), s=kr.getSeconds();
+      setHand(hourHand,  h*30 + m*0.5);
+      setHand(minuteHand,m*6);
+      setHand(secondHand,s*6);
     }
 
-    // ⬇️ 전체 높이를 --match-height 에 정확히 맞추도록 시계 지름과 글자/바늘 비율을 계산
-    function fitHeightAndLayout() {
-      const card = document.querySelector('.card');
-      const clock = document.getElementById('clock');
+    // 전체 높이에 맞추되, 숫자/바늘은 큼직하게
+    function fitAndLayout(){
+      const card=document.querySelector('.card');
+      const clock=document.getElementById('clock');
+      const target=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--match-height'));
+      const padTB=parseFloat(getComputedStyle(card).paddingTop)+parseFloat(getComputedStyle(card).paddingBottom);
+      const headerH=document.querySelector('.header').offsetHeight;
 
-      const target = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--match-height')); // px
-      const styles = getComputedStyle(card);
-      const padTB = parseFloat(styles.paddingTop) + parseFloat(styles.paddingBottom);
+      let avail=target - padTB - headerH;
+      avail=Math.max(120,avail);
 
-      const header = document.querySelector('.header');
-      const headerH = header.offsetHeight; // 제목+날짜+header margin 포함
+      // 시계 지름을 여유 거의 없이 키움
+      const diameter=Math.floor(avail * 0.98);  // ⬅️ 더 크게 보이도록 0.98
+      const radius=diameter/2;
+      clock.style.width=clock.style.height=diameter+'px';
 
-      // 남는 공간 안에 시계가 들어가야 함
-      let avail = target - padTB - headerH;
-      // 안전 여백
-      avail = Math.max(120, avail); // 최소 120px
+      // 큰 숫자 크게
+      const bigFS=Math.round(diameter * 0.16);  // ⬅️ 기존 대비 확대
+      const offset=Math.round(diameter * 0.12);
+      [num12,num3,num6,num9].forEach(el=>el.style.fontSize=bigFS+'px');
+      num12.style.left=radius+'px';          num12.style.top=offset+'px';
+      num3 .style.left=(diameter-offset)+'px'; num3 .style.top=radius+'px';
+      num6 .style.left=radius+'px';          num6 .style.top=(diameter-offset)+'px';
+      num9 .style.left=offset+'px';          num9 .style.top=radius+'px';
 
-      // 시계 지름 = 사용가능 높이의 0.9 (상하 여유 10%)
-      const diameter = Math.floor(avail * 0.9);
-      clock.style.width  = diameter + 'px';
-      clock.style.height = diameter + 'px';
+      // 중심 점 더 크게
+      const dot=Math.round(diameter*0.12);
+      const borderW=Math.max(4,Math.round(diameter*0.03));
+      const center=document.getElementById('clockCenter');
+      center.style.width=dot+'px';
+      center.style.height=dot+'px';
+      center.style.borderWidth=borderW+'px';
 
-      const radius = diameter / 2;
-      const largeFont = Math.round(diameter * 0.10);
-      const numOffset = Math.round(diameter * 0.11);
+      // 바늘 길이/두께 “크게”
+      const hourLen =Math.round(radius*0.68);
+      const minLen  =Math.round(radius*0.60);  // 분침 조금 짧게
+      const secLen  =Math.round(radius*0.80);
 
-      // 큰 숫자 위치/크기
-      [num12, num3, num6, num9].forEach(el => el.style.fontSize = largeFont + 'px');
-      num12.style.left = radius + 'px';               num12.style.top  = numOffset + 'px';
-      num3.style.left  = (diameter - numOffset) + 'px'; num3.style.top  = radius + 'px';
-      num6.style.left  = radius + 'px';               num6.style.top   = (diameter - numOffset) + 'px';
-      num9.style.left  = numOffset + 'px';            num9.style.top   = radius + 'px';
+      hourHand.style.height=hourLen+'px';
+      minuteHand.style.height=minLen+'px';
+      secondHand.style.height=secLen+'px';
 
-      // 작은 숫자 갱신
-      clock.querySelectorAll('.minor-number').forEach(e => e.remove());
-      const minorNums = [1,2,4,5,7,8,10,11];
-      const minorFont = Math.round(diameter * 0.06);
-      const minorRadius = radius - Math.max(18, Math.floor(diameter * 0.14));
-      minorNums.forEach(n => {
-        const angle = (n * 30) * Math.PI / 180;
-        const x = radius + minorRadius * Math.sin(angle);
-        const y = radius - minorRadius * Math.cos(angle);
-        const el = document.createElement('div');
-        el.className = 'minor-number';
-        el.style.fontSize = minorFont + 'px';
-        el.style.left = x + 'px';
-        el.style.top  = y + 'px';
-        el.textContent = n;
-        clock.appendChild(el);
-      });
+      const hourW=Math.max(10,Math.round(diameter*0.07));
+      const minW =Math.max(8, Math.round(diameter*0.055));
+      const secW =Math.max(3, Math.round(diameter*0.03));
 
-      // 바늘 길이/두께 (분침 더 짧게)
-      const hourLen   = Math.round(radius * 0.62);
-      const minuteLen = Math.round(radius * 0.55);
-      const secondLen = Math.round(radius * 0.70);
-      hourHand.style.height   = hourLen   + 'px';
-      minuteHand.style.height = minuteLen + 'px';
-      secondHand.style.height = secondLen + 'px';
-
-      const hourW   = Math.max(8,  Math.round(diameter * 0.05));
-      const minuteW = Math.max(6,  Math.round(diameter * 0.04));
-      const secondW = Math.max(3,  Math.round(diameter * 0.02));
-      hourHand.style.width   = hourW   + 'px';
-      minuteHand.style.width = minuteW + 'px';
-      secondHand.style.width = secondW + 'px';
+      hourHand.style.width=hourW+'px';
+      minuteHand.style.width=minW+'px';
+      secondHand.style.width=secW+'px';
     }
 
-    // 초기화
     updateDate();
-    fitHeightAndLayout();
+    fitAndLayout();
     updateClock();
-    setInterval(updateClock, 1000);
-
-    // 창 크기 바뀌면 폰트/숫자 재배치(높이 목표는 유지)
-    window.addEventListener('resize', fitHeightAndLayout);
+    setInterval(updateClock,1000);
+    window.addEventListener('resize',fitAndLayout);
   </script>
 </body>
 </html>
