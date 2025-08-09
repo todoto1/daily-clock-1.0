@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Time Widget</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #ffffff; display: flex; justify-content: center; align-items: center; min-height: 100vh;
+    }
+    .widget {
+      background: white; border-radius: 40px; padding: 32px 28px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.06); width: 100%; max-width: 300px;
+      border: 1px solid rgba(0,0,0,0.04);
+    }
+    .header { text-align: center; margin-bottom: 24px; }
+    .title { font-size: 1.75rem; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; letter-spacing: -0.02em; }
+    .date { font-size: .95rem; color: #999; font-weight: 500; }
+
+    .clock-container { display: flex; justify-content: center; align-items: center; position: relative; width: 200px; height: 200px; margin: 0 auto; }
+    .clock { position: relative; width: 200px; height: 200px; border-radius: 50%; background: white; }
+
+    /* 큰 숫자 (12/3/6/9) */
+    .clock-number {
+      position: absolute; font-size: 1.15rem; font-weight: 700; color: #1a1a1a;
+      transform: translate(-50%, -50%);
+    }
+    .number-12 { top: 18px; left: 50%; }
+    .number-3  { top: 50%; left: 182px; transform: translate(-50%,-50%); }
+    .number-6  { top: 182px; left: 50%; }
+    .number-9  { top: 50%; left: 18px; }
+
+    /* 작은 숫자 (1,2,4,5,7,8,10,11) */
+    .minor-number {
+      position: absolute; font-size: .8rem; font-weight: 500; color: #333;
+      transform: translate(-50%, -50%);
+    }
+
+    /* 중심점: 맨 앞 + 흰색 외곽선 */
+    .clock-center {
+      position: absolute; top: 50%; left: 50%;
+      width: 18px; height: 18px; background: #000cfe;
+      border: 4px solid #ffffff; border-radius: 50%;
+      transform: translate(-50%, -50%); z-index: 999;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
+    }
+
+    /* 바늘: 중앙 고정, 아래끝 회전축 */
+    .hand {
+      position: absolute; top: 50%; left: 50%;
+      transform-origin: 50% 100%; border-radius: 999px; z-index: 10;
+    }
+    .hour-hand   { width: 10px; height: 62px; background: #1a1a1a; z-index: 12; }
+    .minute-hand { width: 8px;  height: 66px; background: #1a1a1a; z-index: 13; }
+    .second-hand { width: 4px;  height: 88px; background: #000cfe; z-index: 11; }
+  </style>
+</head>
+<body>
+  <div class="widget">
+    <div class="header">
+      <div class="title">Time</div>
+      <div class="date" id="todayDate"></div>
+    </div>
+
+    <div class="clock-container">
+      <div class="clock" id="clock">
+        <!-- 큰 숫자 -->
+        <div class="clock-number number-12">12</div>
+        <div class="clock-number number-3">3</div>
+        <div class="clock-number number-6">6</div>
+        <div class="clock-number number-9">9</div>
+
+        <!-- 바늘 -->
+        <div class="hand hour-hand" id="hourHand"></div>
+        <div class="hand minute-hand" id="minuteHand"></div>
+        <div class="hand second-hand" id="secondHand"></div>
+
+        <!-- 중심점 (맨 앞) -->
+        <div class="clock-center"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 작은 숫자 1,2,4,5,7,8,10,11 자동 배치
+    (function addMinorNumbers() {
+      const clock = document.getElementById('clock');
+      const center = 100;       // 시계 중심(px)
+      const radius = 82;        // 숫자 반지름
+      const minor = [1,2,4,5,7,8,10,11];
+      minor.forEach(n => {
+        const angle = (n * 30) * Math.PI / 180;
+        const x = center + radius * Math.sin(angle);
+        const y = center - radius * Math.cos(angle);
+        const el = document.createElement('div');
+        el.className = 'minor-number';
+        el.style.left = x + 'px';
+        el.style.top  = y + 'px';
+        el.textContent = n;
+        clock.appendChild(el);
+      });
+    })();
+
+    function setHand(el, deg) {
+      el.style.transform = `translate(-50%, -100%) rotate(${deg}deg)`;
+    }
+
+    function updateClock() {
+      const now = new Date();
+      const koreaTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+      const h = koreaTime.getHours() % 12;
+      const m = koreaTime.getMinutes();
+      const s = koreaTime.getSeconds();
+
+      const hourAngle = h * 30 + m * 0.5;
+      const minuteAngle = m * 6;
+      const secondAngle = s * 6;
+
+      setHand(document.getElementById('hourHand'), hourAngle);
+      setHand(document.getElementById('minuteHand'), minuteAngle);
+      setHand(document.getElementById('secondHand'), secondAngle);
+    }
+
+    function updateDate() {
+      const today = new Date();
+      const koreaTime = new Date(today.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+      document.getElementById('todayDate').innerText = koreaTime.toLocaleDateString('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Seoul'
+      });
+    }
+
+    updateDate();
+    updateClock();
+    setInterval(updateClock, 1000);
+  </script>
+</body>
+</html>
